@@ -4,7 +4,7 @@
 
 - 复现
   1. 执行命令 `python herbiv-cli.py --function protein --proteins ENSP00000381588 --score 990`
-  2. 报错：ValueError: max() arg is an empty sequence
+  2. compute line 214 ValueError: max() arg is an empty sequence
 
 **SettingWithCopyWarning**
 
