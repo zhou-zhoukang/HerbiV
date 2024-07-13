@@ -1,7 +1,5 @@
 import unittest
-
 import numpy as np
-
 from herbiv import *
 
 
@@ -40,10 +38,10 @@ class TestHerbiv(unittest.TestCase):
         self.assertEqual(tcm2['STITCH_id'][1], "CIDm00000206")
 
         chem_protein_links1 = get_chem_protein_links('Ensembl_ID', ['ENSP00000335062'], 200)
-        print(chem_protein_links1)
         self.assertEqual(chem_protein_links1.shape, (2, 3))
 
-        return
+        proteins1 = get_proteins('gene_name', ['PDCD1 PD1'])
+        self.assertEqual(proteins1.shape, (1, 3))
 
     def test_version(self):
         print(np.version.version)

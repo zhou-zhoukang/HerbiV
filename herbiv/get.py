@@ -160,8 +160,8 @@ def get_chemicals(by: str, items: list[str]) -> pd.DataFrame:
 
 def get_chem_protein_links(by: str, items: list[str], score=900) -> pd.DataFrame:
     """
-    读取HerbiV_chemical_protein_links数据集，
-    返回items中化合物/蛋白的化合物-靶点（蛋白）连接的combined_score(s)大于等于score的连接信息。
+    读取 HerbiV_chemical_protein_links 数据集，
+    返回 items 中化合物/蛋白的化合物-靶点（蛋白）连接的 combined_score(s) 大于等于 score 的连接信息。
     Read the HerbiV_chemical_protein_links dataset and
     return chemical(s)-target(s)(protein(s)) connection information
     for which the combined_score of the chemical(s)/protein(s) in items is no less than the score.
@@ -170,7 +170,7 @@ def get_chem_protein_links(by: str, items: list[str], score=900) -> pd.DataFrame
         by (str): 数据集中与items相匹配的列的列名。Column name of the column in the dataset that matches items.
         items (collections.abc.Iterable): 要查询的化合物/蛋白。Chemical(s)/protein(s) to be queried.
         score (int): 仅combined_score大于等于score的记录会被筛选出，默认为900，最大为1000，最小为0。
-        Record(s) with combined_score no less than score will be filtered out, 900 by default.
+        Record (s) with combined_score no less than score will be filtered out, 900 by default.
 
     Returns:
         pandas.DataFrame: items中化合物/蛋白的化合物-靶点（蛋白）连接的combined_score大于等于score的连接信息。
@@ -213,7 +213,7 @@ def get_proteins(by: str, items: list[str]) -> pd.DataFrame:
             pandas.DataFrame: items中蛋白的信息。Protein information in items.
 
         Examples:
-            >>> get_proteins('protein_name', ['PDCD1 PD1'])# 获取gene_name（基因名）为PDCD1 PD1的蛋白的信息（不建议使用名称检索）
+            >>> get_proteins('gene_name', ['PDCD1 PD1'])  # 获取gene_name（基因名）为PDCD1 PD1的蛋白的信息（不建议使用名称检索）
                     Ensembl_ID  ...  gene_name
             0  ENSP00000335062  ...  PDCD1 PD1
     """
