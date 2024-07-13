@@ -13,3 +13,8 @@
   2. 警告 SettingWithCopyWarning
 
 **pydoc 格式不统一**
+
+**Future Warning**
+已解决
+原因：在 get_chem_protein_links 时，需要将 Combined_score 映射为小数，与原始 int 类型不兼容
+解决：提前将 Combined_score 的类型修改为 float
