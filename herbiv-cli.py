@@ -4,6 +4,7 @@ import argparse
 import numpy as np
 import pandas as pd
 from herbiv import analysis
+import time
 import warnings
 # 消除 pandas Future Warning
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -144,7 +145,7 @@ def from_tcm_protein(tcms: list[str], proteins: list[str], score: int, path):
         return json.dumps({'msg': 'Wrong protein ID'})
     result = analysis.from_tcm_or_formula(
         tcm_or_formula_id=tcms,
-        proteins_id=proteins,
+        protein_ids=proteins,
         path=path,
         score=score
     )
@@ -177,7 +178,7 @@ def from_formula_protein(formulas: list[str], proteins: list[str], score: int, p
         return json.dumps({'msg': 'Wrong protein ID'})
     result = analysis.from_tcm_or_formula(
         tcm_or_formula_id=formulas,
-        proteins_id=proteins,
+        protein_ids=proteins,
         path=path,
         score=score
     )
@@ -233,6 +234,7 @@ def from_protein(proteins: list[str], score: int, path):
 
 
 def main():
+    start_time = time.time()
     parser = argparse.ArgumentParser()
     parser.add_argument('--function', "-f", choices=["tcm", "formula", "protein", "tcm_protein", "formula_protein"], required=True, help='Functions')
     parser.add_argument('--tcms', nargs="+", type=str, help='TCM ids')
@@ -253,6 +255,8 @@ def main():
         print(from_formula_protein(args.formulas, args.proteins, args.score, args.path))
     elif args.function == "protein":
         print(from_protein(args.proteins, args.score, args.path))
+    end_time = time.time()
+    print(f"执行时间: {end_time - start_time:.6f} 秒")
 
 
 if __name__ == '__main__':

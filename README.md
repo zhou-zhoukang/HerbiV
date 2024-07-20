@@ -110,25 +110,25 @@ python herbiv-cli.py -h
 
 - 给定 tcm 分析
 ```shell
-python herbiv-cli.py --function tcm --tcms HVM0367 HVM1695 --path result
+python -m memory_profiler herbiv-cli.py --function tcm --tcms HVM0367 HVM1695 --path result
 ```
 
 - 给定 formula 分析
 ```shell
-python herbiv-cli.py --function formula --formulas HVP1625 --path result
+python -m memory_profiler herbiv-cli.py --function formula --formulas HVP1625 --path result
 ```
 
 - 给定 tcm 和 protein 分析
 ```shell
-python herbiv-cli.py --function tcm_protein --tcms HVM0367 HVM1695 --proteins ENSP00000043402 --path result
+python -m memory_profiler herbiv-cli.py --function tcm_protein --tcms HVM0367 HVM1695 --proteins ENSP00000043402 --path result
 ```
 
 - 给定 formula 和 protein 分析
 ```shell
-python herbiv-cli.py --function formula_protein --formulas HVP1625 --protein ENSP00000043402 ENSP00000223366 --path result
+python -m memory_profiler herbiv-cli.py --function formula_protein --formulas HVP1625 --protein ENSP00000043402 ENSP00000223366 --path result
 ```
 
 - 给定 protein 分析
 ```shell
-python herbiv-cli.py --function protein --proteins ENSP00000381588 --score 500
+python herbiv-cli.py --function protein --proteins ENSP00000381588 --score 500 --path result
 ```

@@ -1,6 +1,7 @@
 import unittest
 import numpy as np
-from herbiv import *
+from herbiv.get import *
+from herbiv.compute import *
 
 
 class TestHerbiv(unittest.TestCase):
@@ -42,6 +43,9 @@ class TestHerbiv(unittest.TestCase):
 
         proteins1 = get_proteins('gene_name', ['PDCD1 PD1'])
         self.assertEqual(proteins1.shape, (1, 3))
+
+    def test_compute(self):
+        return
 
     def test_version(self):
         print(np.version.version)

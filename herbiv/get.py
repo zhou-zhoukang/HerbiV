@@ -4,8 +4,6 @@ import os
 data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
 
 
-# TODO: 为各函数增加抛出异常功能，若无法查询到相关信息，则抛出异常。
-
 def get_something(table_name: str, by: str, items: list[str], drop_dup: list[str] = None) -> pd.DataFrame:
     try:
         # 读取 HerbiV_formula 数据集
@@ -74,22 +72,22 @@ def get_formula_tcm_links(by: str, items: list[str]) -> pd.DataFrame:
 
 def get_tcm(by: str, items: list[str]) -> pd.DataFrame:
     """
-        读取HerbiV_tcm数据集，返回items中中药的信息。
-        Read the HerbiV_tcm dataset and return the TCM information in items.
+    读取HerbiV_tcm数据集，返回items中中药的信息。
+    Read the HerbiV_tcm dataset and return the TCM information in items.
 
-        Args:
-            by (str): 数据集中与items相匹配的列的列名。Column name of the column in the dataset that matches items.
-            items (collections.abc.Iterable): 要查询的中药。TCM to be queried.
+    Args:
+        by (str): 数据集中与items相匹配的列的列名。Column name of the column in the dataset that matches items.
+        items (collections.abc.Iterable): 要查询的中药。TCM to be queried.
 
-        Returns:
-            pandas.DataFrame: items中中药的信息。TCM information in items.
+    Returns:
+        pandas.DataFrame: items中中药的信息。TCM information in items.
 
-        Examples:
-            >>> get_tcm('cn_name', ['柴胡', '黄芩'])  # 获取cn_name（中文名）为柴胡和黄芩的中药的信息（不建议使用中文名检索）
-                 HVMID cn_name pinyin_name  ... TCM_ID_id SymMap_id TCMSP_id
-            0  HVM0367      柴胡     CHAI HU  ...    3396.0      58.0     80.0
-            1  HVM1695      黄芩   HUANG QIN  ...    6700.0     188.0    371.0
-            [2 rows x 19 columns]
+    Examples:
+        >>> get_tcm('cn_name', ['柴胡', '黄芩'])  # 获取cn_name（中文名）为柴胡和黄芩的中药的信息（不建议使用中文名检索）
+             HVMID cn_name pinyin_name  ... TCM_ID_id SymMap_id TCMSP_id
+        0  HVM0367      柴胡     CHAI HU  ...    3396.0      58.0     80.0
+        1  HVM1695      黄芩   HUANG QIN  ...    6700.0     188.0    371.0
+        [2 rows x 19 columns]
     """
     return get_something('HerbiV_tcm.csv', by, items)
 
@@ -169,11 +167,11 @@ def get_chem_protein_links(by: str, items: list[str], score=900) -> pd.DataFrame
     Args:
         by (str): 数据集中与items相匹配的列的列名。Column name of the column in the dataset that matches items.
         items (collections.abc.Iterable): 要查询的化合物/蛋白。Chemical(s)/protein(s) to be queried.
-        score (int): 仅combined_score大于等于score的记录会被筛选出，默认为900，最大为1000，最小为0。
-        Record (s) with combined_score no less than score will be filtered out, 900 by default.
+        score (int): 仅 combined_score 大于等于 score 的记录会被筛选出，默认为 900，最大为 1000，最小为 0。
+        score (s) with combined_score no less than score will be filtered out, 900 by default.
 
     Returns:
-        pandas.DataFrame: items中化合物/蛋白的化合物-靶点（蛋白）连接的combined_score大于等于score的连接信息。
+        pandas.DataFrame: items 中化合物/蛋白的化合物-靶点（蛋白）连接的 combined_score 大于等于 score 的连接信息。
         Chemical(s)-target(s)(protein(s)) connection information for which
         the combined_score of the chemical(s)/protein(s) is no less than the score in items.
 

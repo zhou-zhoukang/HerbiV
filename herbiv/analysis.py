@@ -1,50 +1,47 @@
+import pandas as pd
+
 from herbiv import get
 from herbiv import compute
 from herbiv import output
+from memory_profiler import profile
 
 
-# TODO: 将文档修改为get中的格式。
-def from_tcm_or_formula(tcm_or_formula_id,
-                        proteins_id=None,
-                        score=990,
-                        out_for_cytoscape=True,
-                        out_graph=True,
-                        re=True,
-                        path='results'):
+@profile
+def from_tcm_or_formula(tcm_or_formula_id:  list[str],
+                        protein_ids:        None | list[str] = None,
+                        score:              int = 990,
+                        out_for_cytoscape:  bool = True,
+                        out_graph:          bool = True,
+                        re:                 bool = True,
+                        path:               str = 'results'
+                        ):
     """
-    进行经典的正向网络药理学分析
-    :param tcm_or_formula_id: 任何可以使用in判断一个元素是否在其中的组合数据类型，拟分析的中药或复方的ID
-    :param proteins_id: None 或任何可以使用in判断一个元素是否在其中的组合数据类型，存储拟分析蛋白（靶点）在STITCH中的Ensembl_ID。
-    默认为None
-    :param score: int类型，HerbiV_chemical_protein_links数据集中仅combined_score大于等于score的记录会被筛选出，默认为990
-    :param out_for_cytoscape: 布尔类型，是否输出用于Cytoscape绘图的文件，默认为True
-    :param out_graph: 布尔类型，是否输出基于ECharts的html格式的网络可视化图，默认为True
-    :param re: 布尔类型，是否返回原始分析结果（中药、化合物（中药成分）、蛋白（靶点）及其连接信息）
-    :param path: 字符串类型，存放结果的目录
-    :return: formula: pd.DataFrame类型，复方信息（仅在输入的tcm_or_formula为HVPID时返回）
-    :return: formula_tcm_links: pd.DataFrame类型，复方-中药连接信息（仅在输入的tcm_or_formula为HVPID时返回）
-    :return: tcm: pd.DataFrame类型，中药信息
-    :return: tcm_chem_links: pd.DataFrame类型，中药-化合物（中药成分）连接信息
-    :return: chem: pd.DataFrame类型，化合物（中药成分）信息
+    经典正向网络药理学分析
+    :param tcm_or_formula_id:   任何可以使用 in 判断一个元素是否在其中的组合数据类型，拟分析的中药或复方的 ID 列表
+    :param protein_ids:         None 或任何可以使用 in 判断一个元素是否在其中的组合数据类型，存储拟分析蛋白（靶点）在 STITCH 中的 Ensembl_ID
+    :param score:               HerbiV_chemical_protein_links 数据集中仅 combined_score 大于等于 score 的记录会被筛选出，默认为 990
+    :param out_for_cytoscape:   是否输出用于 Cytoscape 绘图的文件，默认为True
+    :param out_graph:           是否输出基于 ECharts 的 html 格式的网络可视化图，默认为True
+    :param re:                  是否返回原始分析结果（中药、化合物（中药成分）、蛋白（靶点）及其连接信息）
+    :param path:                字符串类型，存放结果的目录
+    :return: formula:            pd.DataFrame类型，复方信息（仅在输入的 tcm_or_formula 为 HVPID 时返回）
+    :return: formula_tcm_links:  pd.DataFrame类型，复方-中药连接信息（仅在输入的 tcm_or_formula 为 HVPID 时返回）
+    :return: tcm:                pd.DataFrame类型，中药信息
+    :return: tcm_chem_links:     pd.DataFrame类型，中药-化合物（中药成分）连接信息
+    :return: chem:               pd.DataFrame类型，化合物（中药成分）信息
     :return: chem_protein_links: pd.DataFrame类型，化合物（中药成分）-蛋白（靶点）连接信息
-    :return: proteins: pd.DataFrame类型，蛋白（靶点）信息
+    :return: proteins:           pd.DataFrame类型，蛋白（靶点）信息
     Examples:
         **From Formula**
-
         >>> from_tcm_or_formula(['HVP1625'])
         See more at : demo.ipynb
-
         **From TCM**
-
         >>> from_tcm_or_formula(['HVM0367', 'HVM1695'])
         See more at :demo
-
         **From Formula and Proteins**
-
         >>> from_tcm_or_formula(['HVP1625'],['ENSP00000381588', 'ENSP00000252519'], score=400)# medium confidence in STITCH
-
     """
-    if tcm_or_formula_id[0][2] == 'P':  # 判断输入是否为复方的HVPID
+    if tcm_or_formula_id[0][2] == 'P':  # 输入是否为复方ID “HVPID”
         formula = get.get_formula('HVPID', tcm_or_formula_id)  # 获取该复方的信息
         formula_tcm_links = get.get_formula_tcm_links('HVPID', formula['HVPID'])
         tcm = get.get_tcm('HVMID', formula_tcm_links['HVMID'])
@@ -57,23 +54,22 @@ def from_tcm_or_formula(tcm_or_formula_id,
     chem = get.get_chemicals('HVCID', tcm_chem_links['HVCID'])
     chem_protein_links = get.get_chem_protein_links('HVCID', chem['HVCID'], score)
 
-    if proteins_id is None:
+    if protein_ids is None:
         proteins = get.get_proteins('Ensembl_ID', chem_protein_links['Ensembl_ID'])
     else:
-        proteins = get.get_proteins('Ensembl_ID', proteins_id)
+        proteins = get.get_proteins('Ensembl_ID', protein_ids)
 
     # 深度优先搜索筛选有效节点
-    formula, formula_tcm_links, tcm, tcm_chem_links, chem, chem_protein_links, proteins = dfs_filter(
-        formula, formula_tcm_links, tcm, tcm_chem_links, chem, chem_protein_links, proteins)
+    formula, formula_tcm_links, tcm, tcm_chem_links, chem, chem_protein_links, proteins = dfs_filter (
+        formula, formula_tcm_links, tcm, tcm_chem_links, chem, chem_protein_links, proteins
+    )
 
     tcm, chem, formula = compute.score(tcm, tcm_chem_links, chem, chem_protein_links, formula, formula_tcm_links)
 
     if out_for_cytoscape:
         output.out_for_cyto(tcm, tcm_chem_links, chem, chem_protein_links, proteins, path)
-
     if out_graph:
         output.vis(tcm, tcm_chem_links, chem, chem_protein_links, proteins, path)
-
     if re:
         if tcm_or_formula_id[0][2] == 'P':
             return formula, formula_tcm_links, tcm, tcm_chem_links, chem, chem_protein_links, proteins
@@ -81,26 +77,28 @@ def from_tcm_or_formula(tcm_or_formula_id,
             return tcm, tcm_chem_links, chem, chem_protein_links, proteins
 
 
-def from_proteins(proteins,
-                  score=0,
-                  random_state=None,
-                  num=1000,
-                  tcm_component=True,
-                  formula_component=True,
-                  out_for_cytoscape=True,
-                  re=True,
-                  path='result'):
+@profile
+def from_proteins(proteins:  list[str],
+                  score:             int = 0,
+                  random_state:      None | int = None,
+                  num:               int = 1000,
+                  tcm_component:     bool = True,
+                  formula_component: bool = True,
+                  out_for_cytoscape: bool = True,
+                  re:                bool = True,
+                  path:              str = 'result'
+                  ):
     """
     进行逆向网络药理学分析
-    :param proteins: 任何可以使用in判断一个元素是否在其中的组合数据类型，存储拟分析蛋白（靶点）在STITCH中的Ensembl_ID
-    :param score: int类型，HerbiV_chemical_protein_links数据集中仅combined_score大于等于score的记录会被筛选出，默认为0
-    :param random_state: int类型，指定优化模型使用的随机数种子
-    :param num: int类型，指定优化时需生成的解的组数
-    :param tcm_component: 布尔类型，是否进行中药组合优化
+    :param proteins:      任何可以使用in判断一个元素是否在其中的组合数据类型，存储拟分析蛋白（靶点）在STITCH中的Ensembl_ID
+    :param score:         HerbiV_chemical_protein_links数据集中仅combined_score大于等于score的记录会被筛选出，默认为0
+    :param random_state:  指定优化模型使用的随机数种子
+    :param num:           指定优化时需生成的解的组数
+    :param tcm_component:     是否进行中药组合优化
     :param formula_component: 布尔类型，是否进行复方组合优化
     :param out_for_cytoscape: 布尔类型，是否输出用于Cytoscape绘图的文件
-    :param re: 布尔类型，是否返回原始分析结果
-    :param path: 字符串类型，存放结果的目录
+    :param re:                布尔类型，是否返回原始分析结果
+    :param path:              字符串类型，存放结果的目录
     :return: formula:            pd.DataFrame类型，复方信息
     :return: formula_tcm_links:  pd.DataFrame类型，复方-中药连接信息
     :return: tcm:                pd.DataFrame类型，中药信息
@@ -133,37 +131,44 @@ def from_proteins(proteins,
 
     if out_for_cytoscape:
         output.out_for_cyto(tcm, tcm_chem_links, chem, chem_protein_links, proteins, path)
-
     if re:
         return formula, formula_tcm_links, tcm, tcm_chem_links, chem, chem_protein_links, proteins, tcms, formulas
 
 
-def dfs_filter(formula, formula_tcm_links, tcm, tcm_chem_links, chem, chem_protein_links, proteins):
-    """深度优先搜索筛选有效节点（在完整的（复方-）中药-化合物-蛋白通路中的节点）
-    :param formula: pd.DataFrame类型，复方信息
-    :param formula_tcm_links: pd.DataFrame类型，复方-中药连接信息
-    :param tcm: pd.DataFrame类型，中药信息
-    :param tcm_chem_links: pd.DataFrame类型，中药-化合物（中药成分）连接信息
-    :param chem: pd.DataFrame类型，化合物（中药成分）信息
-    :param chem_protein_links: pd.DataFrame类型，化合物（中药成分）-蛋白（靶点）连接信息
-    :param proteins: pd.DataFrame类型，蛋白（靶点）信息
-    :return: formula: pd.DataFrame类型，复方信息
-    :return: formula_tcm_links: pd.DataFrame类型，复方-中药连接信息
-    :return: tcm: pd.DataFrame类型，中药信息
-    :return: tcm_chem_links: pd.DataFrame类型，中药-化合物（中药成分）连接信息
-    :return: chem: pd.DataFrame类型，化合物（中药成分）信息
-    :return: chem_protein_links: pd.DataFrame类型，化合物（中药成分）-蛋白（靶点）连接信息
-    :return: proteins: pd.DataFrame类型，蛋白（靶点）信息
+def dfs_filter(
+        formula:            pd.DataFrame,
+        formula_tcm_links:  pd.DataFrame,
+        tcm:                pd.DataFrame,
+        tcm_chem_links:     pd.DataFrame,
+        chem:               pd.DataFrame,
+        chem_protein_links: pd.DataFrame,
+        proteins:           pd.DataFrame
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """
+    深度优先搜索筛选有效节点（在完整的（复方-）中药-化合物-蛋白通路中的节点）
+    :param formula:              复方信息
+    :param formula_tcm_links:    复方-中药连接信息
+    :param tcm:                  中药信息
+    :param tcm_chem_links:       中药-化合物（中药成分）连接信息
+    :param chem:                 化合物（中药成分）信息
+    :param chem_protein_links:   化合物（中药成分）-蛋白（靶点）连接信息
+    :param proteins:             蛋白（靶点）信息
+    :return: formula:            pd.DataFrame，复方信息
+    :return: formula_tcm_links:  pd.DataFrame，复方-中药连接信息
+    :return: tcm:                pd.DataFrame，中药信息
+    :return: tcm_chem_links:     pd.DataFrame，中药-化合物（中药成分）连接信息
+    :return: chem:               pd.DataFrame，化合物（中药成分）信息
+    :return: chem_protein_links: pd.DataFrame，化合物（中药成分）-蛋白（靶点）连接信息
+    :return: proteins:           pd.DataFrame，蛋白（靶点）信息
     """
     formula_id = set()
     tcm_id = set()
     chem_id = set()
     proteins_id = set()
 
-    # 深度优先搜索得到有效节点的ID
+    # 深度优先搜索得到有效节点的ID (从formula/tcm 到 chem 到 protein 一条线全都有对应的值，则该链路上的所有节点都是有效节点)
     for f in formula['HVPID'] if (formula_tcm_links is not None) else [0]:
-        for m in tcm['HVMID'] if (formula_tcm_links is None) else set(formula_tcm_links.loc[
-                                                                        formula_tcm_links['HVPID'] == f]['HVMID']):
+        for m in tcm['HVMID'] if (formula_tcm_links is None) else set(formula_tcm_links.loc[formula_tcm_links['HVPID'] == f]['HVMID']):
             for c in set(tcm_chem_links.loc[tcm_chem_links['HVMID'] == m]['HVCID']):
                 for p in set(chem_protein_links.loc[chem_protein_links['HVCID'] == c]['Ensembl_ID']):
                     if p in proteins['Ensembl_ID'].tolist():
@@ -177,11 +182,12 @@ def dfs_filter(formula, formula_tcm_links, tcm, tcm_chem_links, chem, chem_prote
     tcm = tcm.loc[tcm['HVMID'].isin(tcm_id)]
     chem = chem.loc[chem['HVCID'].isin(chem_id)]
     proteins = proteins.loc[proteins['Ensembl_ID'].isin(proteins_id)]
-    formula_tcm_links = None if formula_tcm_links is None else formula_tcm_links.loc[
-        formula_tcm_links['HVPID'].isin(formula_id) & formula_tcm_links['HVMID'].isin(tcm_id)]
+    if formula_tcm_links is None:
+        formula_tcm_links = None
+    else:
+        formula_tcm_links = formula_tcm_links.loc[formula_tcm_links['HVPID'].isin(formula_id) & formula_tcm_links['HVMID'].isin(tcm_id)]
     tcm_chem_links = tcm_chem_links.loc[tcm_chem_links['HVMID'].isin(tcm_id) & tcm_chem_links['HVCID'].isin(chem_id)]
-    chem_protein_links = chem_protein_links.loc[chem_protein_links['HVCID'].isin(chem_id) &
-                                                chem_protein_links['Ensembl_ID'].isin(proteins_id)]
+    chem_protein_links = chem_protein_links.loc[chem_protein_links['HVCID'].isin(chem_id) & chem_protein_links['Ensembl_ID'].isin(proteins_id)]
 
     # 重新编号（chem、tcm和formula在计算score时会重新编号，此处不再重新编号）
     tcm_chem_links.index = range(tcm_chem_links.shape[0])
