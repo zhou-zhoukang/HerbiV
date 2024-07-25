@@ -3,10 +3,10 @@ import pandas as pd
 from herbiv import get
 from herbiv import compute
 from herbiv import output
-from memory_profiler import profile
+# from memory_profiler import profile
 
 
-@profile
+# @profile
 def from_tcm_or_formula(tcm_or_formula_id:  list[str],
                         protein_ids:        None | list[str] = None,
                         score:              int = 990,
@@ -77,7 +77,7 @@ def from_tcm_or_formula(tcm_or_formula_id:  list[str],
             return tcm, tcm_chem_links, chem, chem_protein_links, proteins
 
 
-@profile
+# @profile
 def from_proteins(proteins:  list[str],
                   score:             int = 0,
                   random_state:      None | int = None,

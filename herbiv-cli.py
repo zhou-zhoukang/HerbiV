@@ -256,7 +256,6 @@ def main():
     elif args.function == "protein":
         print(from_protein(args.proteins, args.score, args.path))
     end_time = time.time()
-    print(f"执行时间: {end_time - start_time:.6f} 秒")
 
 
 if __name__ == '__main__':

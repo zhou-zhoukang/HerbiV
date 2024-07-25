@@ -110,7 +110,7 @@ python herbiv-cli.py -h
 
 - 给定 tcm 分析
 ```shell
-python -m memory_profiler herbiv-cli.py --function tcm --tcms HVM0367 HVM1695 --path result
+python herbiv-cli.py --function tcm --tcms HVM0367 HVM1695 --path result
 ```
 
 - 给定 formula 分析
